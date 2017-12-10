@@ -1,18 +1,17 @@
 /*
  * Create a list that holds all of your cards
  */
-
-
+var iconList = ['fa-diamond', 'fa-paper-plane-o', 'fa-anchor', 'fa-bolt', 'fa-anchor', 'fa-cube', 'fa-leaf', 'fa-bicycle', 'fa-diamond', 'fa-bomb', 'fa-leaf', 'fa-bomb', 'fa-bolt', 'fa-bicycle', 'fa-paper-plane-o', 'fa-cube'];
 /*
  * Display the cards on the page
  *   - shuffle the list of cards using the provided "shuffle" method below
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    var currentIndex = array.length,
+        temporaryValue, randomIndex;
 
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
@@ -25,7 +24,13 @@ function shuffle(array) {
     return array;
 }
 
-
+function render(array) {
+    var cards = document.getElementsByClassName('card');
+    array.forEach(function(icon, index) {
+        cards[index].className = 'card';
+        cards[index].children[0].className = 'fa ' + icon;
+    })
+}
 /*
  * set up the event listener for a card. If a card is clicked:
  *  - display the card's symbol (put this functionality in another function that you call from this one)
@@ -36,3 +41,62 @@ function shuffle(array) {
  *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
+var cardOpen;
+var count = 0;
+var moves = 0;
+
+document.getElementsByClassName('deck')[0].onclick = function(me) {
+    meSrc = me.srcElement;
+    if (meSrc.className.indexOf('card') === -1 || meSrc.className.indexOf('card match') > -1 || meSrc === cardOpen) return;
+    meSrc.className = 'card open show';
+    if (!cardOpen) return cardOpen = meSrc;
+    moves++;
+
+    if (cardOpen.children[0].className === meSrc.children[0].className) {
+        count++;
+        meSrc.className = cardOpen.className += 'card match animated rubberBand';
+        setTimeout(function() {
+            meSrc.className = cardOpen.className = 'card match';
+            cardOpen = undefined;
+        }, 300)
+        if (count === 8) {
+            show(document.getElementById('winbox'));
+        }
+    } else {
+        meSrc.className = cardOpen.className += 'card open show animated shake';
+        currCardOpen = cardOpen;
+        setTimeout(function() {
+            meSrc.className = currCardOpen.className = 'card';
+        }, 300)
+        cardOpen = null;
+    }
+    document.getElementsByClassName('moves')[0].innerText = moves;
+    document.getElementsByClassName('moves')[1].innerText = moves;
+};
+
+function reset() {
+    cardOpen = null;
+    count = 0;
+    moves = 0;
+    document.getElementsByClassName('moves')[0].innerText = 0;
+    render(shuffle(iconList))
+}
+
+function hide(ele) {
+    ele.style.display = "none";
+}
+
+function show(ele) {
+    ele.style.display = "block";
+}
+
+function getStar(rate) {
+    return '★★★☆☆☆'.slice(3 - rate, 6 - rate);
+}
+
+document.getElementsByClassName('restart')[0].onclick = reset;
+document.getElementsByClassName('restart')[1].onclick = function() {
+    hide(document.getElementById('winbox'));
+    reset();
+};
+document.addEventListener('DOMContentLoaded', reset)
