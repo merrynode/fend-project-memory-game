@@ -50,7 +50,7 @@ function render(array) {
 var cardOpen; // 点击单个元素
 var count = 0; // 统计匹配成功的数量 8个即为胜利
 var moves = 0; // 计算步数
-var timersId = []; // 存放timeoutId列表
+var beginTime;
 /**
  * 页面游戏元素点击
  */
@@ -60,6 +60,13 @@ document.getElementsByClassName('deck')[0].onclick = function(me) {
     meSrc.className = 'card open show';
     if (!cardOpen) return cardOpen = meSrc;
     moves++;
+    if (moves > 35) {
+        updateStar(0);
+    } else if (moves > 20) {
+        updateStar(1);
+    } else if (moves > 10) {
+        updateStar(2);
+    }
     // 匹配成功
     if (cardOpen.children[0].className === meSrc.children[0].className) {
         count++;
@@ -69,7 +76,10 @@ document.getElementsByClassName('deck')[0].onclick = function(me) {
                 cardOpen = undefined;
             }, 300)
             // 游戏胜利
-        if (count === 8) show(document.getElementById('winbox'));
+        if (count === 8) {
+            document.getElementsByClassName('time')[0].innerText = (Date.now() - beginTime) + 's';
+            show(document.getElementById('winbox'));
+        }
         // 匹配失败
     } else {
         meSrc.className = cardOpen.className += 'card open show animated shake';
@@ -87,15 +97,12 @@ document.getElementsByClassName('deck')[0].onclick = function(me) {
  * 初始化游戏
  */
 function reset() {
+    beginTime = Date.now();
     updateStar(3);
-    timersId.forEach(function(timerId) {
-        clearTimeout(timerId);
-    })
     timersId = [];
     cardOpen = null;
     count = 0;
     moves = 0;
-    setTimeUpdateStar([2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000]);
     document.getElementsByClassName('moves')[0].innerText = 0;
     render(shuffle(iconList))
 }
@@ -121,21 +128,6 @@ function updateStar(number) {
     stars.forEach(function(star, index) {
         star.children[0].className = index < number ? 'fa fa-star' : 'fa fa-star-o';
     })
-}
-/**
- * 设置星星评级时间规则
- * @param {Array} timers 例如[2*60*1000, 5*60*1000, 10*60*1000];
- */
-function setTimeUpdateStar(timers) {
-    timersId.push(setTimeout(function() {
-        updateStar(2);
-        timersId.push(setTimeout(function() {
-            updateStar(1);
-            timersId.push(setTimeout(function() {
-                updateStar(0);
-            }, timers[0]))
-        }, timers[1]))
-    }, timers[0]))
 }
 
 // 游戏过程中重置游戏
