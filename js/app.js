@@ -50,15 +50,19 @@ function render(array) {
 var cardOpen; // 点击单个元素
 var count = 0; // 统计匹配成功的数量 8个即为胜利
 var moves = 0; // 计算步数
-var beginTime;
+var time = 0; // 计时器
+var intervalId; // 定时器ID
+var movesElm = document.getElementsByClassName('moves');
 /**
  * 页面游戏元素点击
  */
 document.getElementsByClassName('deck')[0].onclick = function(me) {
     meSrc = me.srcElement;
+
     if (meSrc.className.indexOf('card') === -1 || meSrc.className.indexOf('card match') > -1 || meSrc === cardOpen) return;
     meSrc.className = 'card open show';
     if (!cardOpen) return cardOpen = meSrc;
+    // if (meSrc.tagName === 'LI') meSrc.className = cardOpen.className = 'card';
     moves++;
     if (moves > 35) {
         updateStar(0);
@@ -70,40 +74,49 @@ document.getElementsByClassName('deck')[0].onclick = function(me) {
     // 匹配成功
     if (cardOpen.children[0].className === meSrc.children[0].className) {
         count++;
-        meSrc.className = cardOpen.className += 'card match animated rubberBand';
+        var currCardOpen = cardOpen;
+        var currMeSrc = meSrc;
+        currCardOpen.classList.add('card', 'match', 'animated', 'rubberBand');
+        currMeSrc.classList.add('card', 'match', 'animated', 'rubberBand');
+        cardOpen = undefined;
         setTimeout(function() {
-                meSrc.className = cardOpen.className = 'card match';
-                cardOpen = undefined;
+                currMeSrc.className = currCardOpen.className = 'card match';
             }, 300)
             // 游戏胜利
         if (count === 8) {
-            document.getElementsByClassName('time')[0].innerText = (Date.now() - beginTime) + 's';
+            clearInterval(intervalId);
+            document.getElementsByClassName('time')[1].innerText = time;
             show(document.getElementById('winbox'));
         }
         // 匹配失败
     } else {
-        meSrc.className = cardOpen.className += 'card open show animated shake';
-        currCardOpen = cardOpen;
+        cardOpen.classList.add('card', 'open', 'show', 'animated', 'shake');
+        meSrc.classList.add('card', 'open', 'show', 'animated', 'shake');
+        var currCardOpen = cardOpen;
+        var currMeSrc = meSrc;
         setTimeout(function() {
-            meSrc.className = currCardOpen.className = 'card';
+            currMeSrc.className = currCardOpen.className = 'card';
         }, 300)
         cardOpen = null;
     }
     // 更新页面上的步数
-    document.getElementsByClassName('moves')[0].innerText = moves;
-    document.getElementsByClassName('moves')[1].innerText = moves;
+    movesElm[0].innerText = moves;
+    movesElm[1].innerText = moves;
 };
 /**
  * 初始化游戏
  */
 function reset() {
-    beginTime = Date.now();
-    updateStar(3);
-    timersId = [];
+    time = 0;
     cardOpen = null;
     count = 0;
     moves = 0;
-    document.getElementsByClassName('moves')[0].innerText = 0;
+    movesElm[0].innerText = 0;
+    updateStar(3);
+    intervalId = setInterval(function() {
+        time++;
+        document.getElementsByClassName('time')[0].innerText = time;
+    }, 1000)
     render(shuffle(iconList))
 }
 /**
@@ -137,5 +150,10 @@ document.getElementsByClassName('restart')[1].onclick = function() {
     hide(document.getElementById('winbox'));
     reset();
 };
-// 首次加载初始化游戏
+
+// 计时器
+setInterval(function() {
+
+    })
+    // 首次加载初始化游戏
 document.addEventListener('DOMContentLoaded', reset);
