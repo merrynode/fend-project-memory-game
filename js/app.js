@@ -66,9 +66,9 @@ document.getElementsByClassName('deck')[0].onclick = function(me) {
     moves++;
     if (moves > 35) {
         updateStar(0);
-    } else if (moves > 20) {
+    } else if (moves > 25) {
         updateStar(1);
-    } else if (moves > 10) {
+    } else if (moves > 15) {
         updateStar(2);
     }
     // 匹配成功
